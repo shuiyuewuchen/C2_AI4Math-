@@ -22,7 +22,7 @@
 |---|---|
 | `paper.tex` | 论文主文件，**单次 `pdflatex`/`xelatex` 即可编译**（参考文献内联 `thebibliography`），含完整结构：摘要、引言、相关工作、三层模型、框架、分析、Limitations、Discussion and Future Work、结论、参考文献 |
 | `paper.pdf` | 已编译好的成品 PDF（10 页，Letter），评委无需自己编译即可查看 |
-| `references.bib` | BibTeX 引用库，**23 条**，全部真实可查（Nature、NeurIPS、ICLR、ICML、CADE、arXiv，含一手文献） |
+| `references.bib` | BibTeX 引用库，**24 条**，全部真实可查（Nature、NeurIPS、ICLR、ICML、CADE、arXiv，含一手文献） |
 | `pilot.py` | 20 题 micro-pilot 脚本：实现 typed DSL 与 `ρ`，实测 verifiability gap `g=0.30`（可复现） |
 | `AI日志.md` | 2 天 AI 协作日志：逐条引用回源核验表 + 3 个 AI 误导案例 |
 | `AAR.md` | 七维复盘报告（目标/过程/差异/成功/误导/教训/改进），含 4 个误导案例与对策 |
@@ -60,7 +60,7 @@ pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex
 
 ## 四、核验说明（回应「引用造假」红线）
 
-- 23 条参考文献**逐条回源核验**（arXiv ID / DOI / Nature 官网），无一条凭空构造。
+- 24 条参考文献**逐条回源核验**（arXiv ID / DOI / Nature 官网），无一条凭空构造。
 - 关键修正：AlphaProof 论文 **Hubert et al., *Nature* 651(8106):607–613, 2025, DOI 10.1038/s41586-025-09833-y**——最初误标为 2026，已按 Nature 官方引用年（2025，DOI 以 `-025-` 结尾）改正，避免「2024 年 IMO 事件引用 2026 年文献」的时间悖论。
 - 正文中具体成绩（IMO 2024 得 28/42 分、银牌水平、解出 4/6 题）均已就近标注来源 `\cite{hubert2025}`。
 
@@ -72,7 +72,7 @@ pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex
 |---|---|
 | 研究严谨性 25 | 文献全部真实可查、论证有命题支撑、结论有边界（明确定位为「框架/诊断视角」，非训练系统或大基准） |
 | 技术实现 20 | `paper.tex` 可编译、结构规范；TikZ 三层模型图 + pipeline 图 + booktabs 分类表 + 推理规则公式；`pilot.py` 可复现；Git 提交清晰 |
-| 产物完整性 15 | `paper.tex` + `paper.pdf` + `references.bib`(23) + AI日志 + AAR + README 齐全 |
+| 产物完整性 15 | `paper.tex` + `paper.pdf` + `references.bib`(24) + AI日志 + AAR + README 齐全 |
 | AI 使用质量 20 | 2 天多轮迭代、prompt 迭代、回源核验工作流、日志佐证 |
 | 复盘质量 20 | 七维 AAR，含 4 个 AI 误导案例与对策 |
 

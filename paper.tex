@@ -364,6 +364,21 @@ Proposition~\ref{prop:sound} makes precise a design implication: the only lever 
 is to shrink $g$ by enlarging $V$---that is, by improving $\rho$---not by improving
 $\mathrm{Ver}$. We make $g$ concrete in \S\ref{sec:pilot}.
 
+\paragraph{Relation to existing metrics.}
+The gap is orthogonal to, rather than a replacement for, accuracy-centric metrics.
+pass@$k$~\cite{chen2021codex} reports the probability that at least one of $k$ sampled
+solutions is correct, which says nothing about whether any individual solution can be
+mechanically checked. Self-consistency~\cite{wang2023selfconsistency} reduces variance by
+majority vote over $k$ samples, but its aggregate answer is a surface statistic: a
+unanimous-but-wrong vote and a single correct answer are indistinguishable at the level of
+the output. In contrast, $g$ measures the fraction of outputs for which a verifier has a
+formal handle at all. The three metrics are therefore complementary: pass@$k$ and
+self-consistency characterize the generator's \emph{accuracy}, while $g$ characterizes the
+\emph{reducibility} of its output to a checkable object---the property that determines whether
+the accuracy numbers can themselves be trusted. A system can have high pass@$k$ yet a large
+$g$ (accurate but uncheckable), or a small $g$ yet low pass@$k$ (checkable but wrong);
+end-to-end reliability requires reporting both.
+
 \subsection{A Taxonomy of Reliability Mechanisms}
 Table~\ref{tab:taxonomy} classifies the dominant AI4Math approaches by \emph{where}
 verification occurs and \emph{what} is verified. The taxonomy exposes a spectrum: answer
@@ -444,7 +459,10 @@ therefore has no handle, and the fluent-but-wrong reading ``$2$'' is invisible t
 The six failures break down into four named causes: non-exact division ($2$), ambiguous
 reference ($2$), vague quantifier ($1$), and missing typing ($1$). Consistent with
 Proposition~\ref{prop:sound}, the verifier produced no false positives among the reducible
-cases and no signal at all among the silent errors.
+cases and no signal at all among the silent errors. A natural next step is to re-run this
+pilot by sampling derivations from a real model on a benchmark subset such as GSM8K, so
+that $g$ becomes a measured property of a trained model rather than a hand-constructed
+illustration.
 
 \section{Limitations}\label{sec:limitations}
 \paragraph{Design and coverage.}
@@ -471,7 +489,9 @@ AlphaProof-style systems implicitly do~\cite{hubert2025}. Second, the taxonomy a
 can be turned into a standardized reporting form for AI4Math papers, improving reproducible
 evaluation~\cite{hendrycks2021,zheng2022}. Third, bidirectional alignment suggests training
 objectives that reward round-tripping (language$\to$IR$\to$language), so that reduction
-fidelity is optimized directly rather than as a byproduct of end-task accuracy.
+fidelity is optimized directly rather than as a byproduct of end-task accuracy. Concretely,
+the micro-pilot of \S\ref{sec:pilot} should be re-run with real model samples so that $g$ is
+measured rather than illustrated.
 
 \section{Conclusion}
 We have argued that the reliability of AI mathematical reasoning is governed by a layer that
@@ -548,6 +568,12 @@ arXiv:2305.20050.
 L. Gao, A. Madaan, S. Zhou, U. Alon, P. Liu, Y. Yang, J. Callan, and G. Neubig.
 PAL: Program-aided language models.
 In \emph{International Conference on Machine Learning (ICML)}, 2023. arXiv:2211.10435.
+
+\bibitem{chen2021codex}
+M. Chen, J. Tworek, H. Jun, Q. Yuan, H. Ponde de Oliveira Pinto, J. Kaplan,
+H. Edwards, Y. Burda, N. Joseph, G. Brockman, et al.
+Evaluating large language models trained on code.
+arXiv:2107.03374, 2021.
 
 \bibitem{achiam2023}
 J. Achiam et al.
