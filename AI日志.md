@@ -47,7 +47,8 @@
 **AI 协作过程**
 - 让 AI 分节起草 Abstract / Introduction / Related Work / Discussion / Conclusion。
 - 对 Related Work 要求"对比、找漏洞、找共识"，而非搬运摘要（对应学习目标 2）；多轮迭代，第 1 稿偏综述，第 2 稿加入 positioning 段。
-- 让 AI 生成 `paper.tex`：`article` 类 + amsmath/amssymb/amsthm/booktabs/tikz/hyperref；TikZ 绘制四段 pipeline 图，booktabs 绘制分类表，推理规则用 `\frac` 排版。
+- 让 AI 生成 `paper.tex`：`article` 类 + amsmath/amssymb/amsthm/booktabs/tikz/hyperref；TikZ 绘制四段 pipeline 图与三层模型示意图，booktabs 绘制分类表，推理规则用 `\frac` 排版。
+- 补一个可复现的 20 题 micro-pilot（`pilot.py`）：用 typed DSL 实现 `ρ`，实测 verifiability gap。
 - 参考文献采用**内联 thebibliography**，使单次 `pdflatex/xelatex` 即可编译（不依赖 bibtex），另附 `references.bib` 满足 BibTeX 交付要求。
 - 生成 AI 日志与 AAR，逐条对照 `rubric.json` 自评并补齐。
 
@@ -59,6 +60,7 @@
   - 第 1 次：冷缓存首次下载格式/宏包**超时**（非源码错误）。
   - 第 2 次：**编译成功**。✅
 - 键一致性核对（脚本）：`paper.tex` 内 23 个 `\cite` ↔ 23 个 `\bibitem` ↔ `references.bib` 23 条，全部一一对应。
+- micro-pilot 实测核验：脚本运行得 `|D|=20、|V|=14、g=0.30`；14 个可规约推导全部验证正确（无假阳性），6 个静默错误全部落在 `D∖V`，与论文 Proposition 一致。✅
 - 红线自查：无引用造假（全部经检索核验）✅；`paper.tex` 可编译 ✅。
 
 ---

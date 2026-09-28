@@ -55,8 +55,9 @@ generation$\to$IR$\to$verification$\to$rendering pipeline, and bidirectional ali
 between IR and language for interpretability and traceability. We formalize a
 \emph{verifiability gap} that quantifies the fraction of model outputs for which a verifier
 provides no signal, and we contribute a taxonomy and a reliability checklist for
-AI-for-mathematics systems. The framework is illustrated with a worked arithmetic example
-and a formal-induction case. Our contribution is not a new prover but a lens: we elevate
+AI-for-mathematics systems. The framework is illustrated with a worked arithmetic example,
+a formal-induction case, and a reproducible 20-problem micro-pilot on which the gap is
+measured at $0.30$. Our contribution is not a new prover but a lens: we elevate
 semantic reduction from an incidental preprocessing step to a first-class, measurable system
 component. We state our conclusions with explicit boundaries on scope.
 \end{abstract}
@@ -102,56 +103,60 @@ contributions:
   \item A formal notion of the \textbf{verifiability gap}, quantifying the outputs on which a
         verifier is silent, together with a \textbf{taxonomy} and a \textbf{reliability
         checklist} for AI4Math systems (\S\ref{sec:analysis}).
+  \item A reproducible \textbf{20-problem micro-pilot} that measures the gap
+        ($g = 0.30$) and turns the framework from a definition into a method
+        (\S\ref{sec:pilot}).
 \end{itemize}
 We emphasize the boundary of this work: we do not train a new model, build a new prover, or
-run a large benchmark. We provide a conceptual and formal lens, with worked micro-examples,
+run a large benchmark; our empirical evidence is a hand-constructed, fully reproducible
+micro-pilot rather than a trained-model evaluation. We provide a conceptual and formal lens,
+with worked micro-examples,
 intended to make reliability properties of AI4Math systems \emph{measurable} and
 \emph{auditable}.
 
 \section{Related Work}\label{sec:related}
-\paragraph{Generation and prompting.}
-Chain-of-thought prompting elicits intermediate reasoning and improves accuracy on
-multi-step problems~\cite{wei2022}. Self-consistency reduces variance by sampling many chains
-and taking a majority vote~\cite{wang2023selfconsistency}. Benchmark-driven progress is
-tracked on GSM8K~\cite{cobbe2021} and MATH~\cite{hendrycks2021}; domain-tuned models such as
-Minerva~\cite{lewkowycz2022} and general models such as GPT-4~\cite{achiam2023} show strong but
-imperfect performance, with systematic errors on interaction-heavy tasks~\cite{collins2024}.
+The reliability of AI mathematics has developed along three interleaved lines. We trace each
+line briefly and locate this paper relative to it.
 
-\paragraph{Post-hoc verification.}
-Learned outcome verifiers score candidate solutions to select an answer~\cite{cobbe2021}.
-Process-supervision rewards individual steps rather than only the final answer, improving
-step-level reliability~\cite{lightman2024}. Program-aided approaches sidestep free-form
-reasoning by having the model emit executable code (``program-of-thought''), which is then run
-by an interpreter~\cite{gao2023pal}. These methods verify an \emph{answer} or a
-\emph{program}, but they do not verify the \emph{claim that the program means what the problem
-asked}; that meaning is left implicit in natural language.
+\paragraph{Line 1: formalized mathematics and interactive theorem proving.}
+This line seeks absolute correctness by moving mathematics into a formal system. The
+formulae-as-types correspondence established that a proof is itself a computable object of a
+given type~\cite{howard1980}, making machine-checkable mathematics possible. Interactive
+theorem provers such as Lean provide a small trusted kernel that reduces every accepted proof
+to the axioms~\cite{demoura2015,demoura2021}. Two obstacles kept this line narrow: statements
+are laborious to formalize, and proofs are hard to search. Autoformalization attacked the
+first by using LLMs to translate informal statements into formal ones~\cite{wu2022}, and
+miniF2F supplied a cross-system benchmark of formally stated olympiad problems~\cite{zheng2022}.
+AlphaProof then combined a large proof-search policy with the Lean kernel and reached a
+silver-medal standard (28 out of 42 points, solving four of six problems) on
+IMO 2024~\cite{hubert2025}. \emph{Position of this paper:} the line guarantees correctness
+only after a successful informal-to-formal translation; we name and measure that translation
+(semantic reduction) as the controlling component.
 
-\paragraph{Formal proof.}
-Interactive theorem provers such as Lean offer a small, trusted kernel: once a proof is
-accepted, its correctness follows from the axioms~\cite{demoura2015,demoura2021}. The
-formulae-as-types correspondence~\cite{howard1980} grounds the idea that a proof is itself a
-computable object, which motivates treating proofs as typed IR. Autoformalization uses LLMs to
-translate informal mathematics into formal statements~\cite{wu2022}, and miniF2F provides a
-cross-system benchmark of formally stated olympiad problems~\cite{zheng2022}. The
-AlphaProof system combines a large proof-search policy with Lean so that every output is a
-machine-checked proof; it reached a silver-medal standard (28 out of 42 points, solving four of six problems) on
-IMO 2024~\cite{hubert2025}. These systems are powerful but exhibit a division of labor:
-the neural component explores, while the kernel verifies---and the informal-to-formal
-translation remains the fragile joint between them.
+\paragraph{Line 2: neural theorem proving and neuro-symbolic discovery.}
+This line uses learned models to supply the search that formal systems lack. Built on the
+Transformer~\cite{vaswani2017} and the few-shot scaling paradigm~\cite{brown2020},
+chain-of-thought prompting elicited step-by-step reasoning in natural language~\cite{wei2022},
+and program-of-thought had the model emit executable code instead of prose~\cite{gao2023pal}.
+Neuro-symbolic systems went further, pairing a learner with a symbolic engine to produce new
+results: guiding human intuition about knot invariants~\cite{davies2021}, discovering faster
+matrix-multiplication algorithms with AlphaTensor~\cite{fawzi2022}, synthesizing olympiad
+geometry proofs in AlphaGeometry~\cite{trinh2024}, and evolving programs that yield new
+constructions in FunSearch~\cite{romera2024}. \emph{Position of this paper:} in every case a
+learned component supplies candidates while a separate engine checks them; the boundary
+between the two is precisely the semantic-reduction boundary we formalize.
 
-\paragraph{Neuro-symbolic discovery.}
-Beyond solving fixed problems, hybrid systems have produced new mathematics: guiding human
-intuition about knot invariants~\cite{davies2021}, discovering faster matrix-multiplication
-algorithms with AlphaTensor~\cite{fawzi2022}, synthesizing solutions to olympiad geometry
-without human demonstrations in AlphaGeometry~\cite{trinh2024}, and evolving programs that
-yield new constructions in FunSearch~\cite{romera2024}. In each case the final artifact is
-symbolic and independently checkable; the LLM supplies candidates.
-
-\paragraph{Positioning.}
-Across all of these lines of work, a common step recurs: informal or sampled output must be
-mapped to a checkable object. We argue this step---\emph{semantic reduction}---deserves to be
-named, modeled, and measured as a first-class component, rather than treated as an incidental
-preprocessing detail. That is the position the present paper occupies.
+\paragraph{Line 3: evaluation benchmarks and reliability.}
+This line asks how far a model's output can be trusted. GSM8K~\cite{cobbe2021} and
+MATH~\cite{hendrycks2021} standardized measurement, Minerva showed strong but imperfect
+performance on quantitative reasoning~\cite{lewkowycz2022}, and interaction-based evaluation
+exposed systematic failures of ChatGPT~\cite{frieder2023,collins2024}. On the reliability axis,
+learned outcome verifiers score candidates~\cite{cobbe2021}, self-consistency averages
+samples~\cite{wang2023selfconsistency}, and process supervision rewards individual
+steps~\cite{lightman2024}; analyses of GPT-4 documented plausible-but-wrong derivations at
+scale~\cite{achiam2023,bubeck2023}. \emph{Position of this paper:} this line measures
+\emph{accuracy} but rarely measures \emph{verifiability}---the fraction of outputs that even
+admit a formal check. Our verifiability gap supplies that missing measure.
 
 \section{A Three-Layer Reliability Model}\label{sec:model}
 We model an AI4Math pipeline as the composition of three layers, each with a distinct
@@ -172,6 +177,25 @@ $(\mathrm{Gen}, \rho, \mathrm{Ver})$ where
 \end{enumerate}
 \end{definition}
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  layer/.style={draw, rounded corners=1.5pt, align=center,
+                minimum width=6.6cm, minimum height=9.5mm, inner sep=3pt, font=\small, fill=#1},
+  arr/.style={-{Stealth}, thick}
+]
+\node[layer=blue!8]    (gen) {Generation layer $\mathrm{Gen}$\\natural-language derivation $d$};
+\node[layer=orange!14] (red) [below=8mm of gen] {Semantic-reduction layer $\rho : \mathrm{NL}\rightharpoonup\mathrm{IR}$\\typed IR --- the bottleneck};
+\node[layer=green!10]  (ver) [below=8mm of red] {Verification layer $\mathrm{Ver} : \mathrm{IR}\to\{\accept,\reject\}$};
+\draw[arr] (gen) -- (red);
+\draw[arr] (red) -- (ver);
+\node[right=1.5mm of red, font=\footnotesize, text=red!70!black, align=left]
+  {where the gap lives:\\$\rho$ fails $\Rightarrow$ no handle to verify};
+\end{tikzpicture}
+\caption{The three-layer model. Derivations flow downward through the semantic-reduction
+layer---the bottleneck---before any verification is possible.}
+\label{fig:layers}
+\end{figure}
 \paragraph{Generation layer.}
 The generation layer produces natural-language chains of reasoning (e.g., chain-of-thought).
 Its defining properties are that it is \emph{probabilistic}, \emph{untyped}, and
@@ -322,7 +346,7 @@ g \;=\; 1 - \frac{|V|}{|D|},
 the fraction of outputs on which the verifier is silent. We then have the following simple
 but useful fact.
 
-\begin{proposition}
+\begin{proposition}\label{prop:sound}
 Let $\mathrm{Ver}$ be sound for a statement $\varphi$: if
 $\mathrm{Ver}(\rho(d),\varphi) = \accept$ then $d$ is a correct proof of $\varphi$. Then
 (i)~among accepted outputs, correctness is guaranteed (no false positives); and
@@ -336,9 +360,9 @@ $\mathrm{Ver}$ receives no object and returns no signal; no computation of $\mat
 distinguish a correct $d$ from an incorrect one in this set. \qedhere
 \end{proof}
 
-The proposition makes precise a design implication: the only lever that reduces silent error
+Proposition~\ref{prop:sound} makes precise a design implication: the only lever that reduces silent error
 is to shrink $g$ by enlarging $V$---that is, by improving $\rho$---not by improving
-$\mathrm{Ver}$.
+$\mathrm{Ver}$. We make $g$ concrete in \S\ref{sec:pilot}.
 
 \subsection{A Taxonomy of Reliability Mechanisms}
 Table~\ref{tab:taxonomy} classifies the dominant AI4Math approaches by \emph{where}
@@ -384,21 +408,61 @@ systems, inspired by but distinct from ML reproducibility checklists. Each item 
   \item \textbf{Applicability boundary.} Does the system declare the problem classes it covers?
 \end{enumerate}
 
+\subsection{A Micro-Pilot: Measuring the Gap on 20 Word Problems}\label{sec:pilot}
+To show that the gap is measurable rather than merely defined, we ran a small, fully
+reproducible micro-pilot. We hand-constructed $|D| = 20$ arithmetic word-problem derivations
+(14 well-typed and 6 deliberately malformed) and implemented $\rho$ as a tiny typed DSL whose
+side conditions mirror \S\ref{sec:framework}: literals are typed $\mathsf{Nat}$, subtraction
+requires a nonnegative result, and division requires an exact divisor. The full script is
+provided alongside this paper (\texttt{pilot.py}). Table~\ref{tab:pilot} summarizes the
+outcome, and two representative cases follow.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}l c r@{}}
+\toprule
+\textbf{Quantity} & \textbf{Symbol} & \textbf{Value}\\
+\midrule
+Derivations & $|D|$ & 20\\
+Reducible (typed) & $|V|$ & 14\\
+Verifiability gap & $g = 1 - |V|/|D|$ & $0.30$\\
+Silent errors ($D \setminus V$) & --- & 6\\
+\bottomrule
+\end{tabular}
+\caption{Summary of the 20-problem micro-pilot. All 14 reducible derivations verified to
+their gold answers; all 6 silent errors lie in $D \setminus V$.}
+\label{tab:pilot}
+\end{table}
+
+Two cases make the gap concrete. In the \emph{success} case, ``Alice has 5 apples, Bob gives
+her 3 more'' reduces to $\mathsf{add}(5,3)$, which types as $\mathsf{Nat}$ and evaluates to
+$8$, matching the gold answer; the verifier accepts. In the \emph{failure} case, ``Alice gives
+away half of her 5 apples'' contains a silent coercion to integer division
+$\mathsf{div}(5,2)$, which the DSL rejects because $2$ does not divide $5$ exactly; $\rho$
+therefore has no handle, and the fluent-but-wrong reading ``$2$'' is invisible to the verifier.
+The six failures break down into four named causes: non-exact division ($2$), ambiguous
+reference ($2$), vague quantifier ($1$), and missing typing ($1$). Consistent with
+Proposition~\ref{prop:sound}, the verifier produced no false positives among the reducible
+cases and no signal at all among the silent errors.
+
 \section{Limitations}\label{sec:limitations}
 \paragraph{Design and coverage.}
 The framework inherits the cost of its central component. Designing a typed IR with the four
 required properties is nontrivial, and mapping natural language into it remains expensive and
 imperfect; these are exactly the ambiguity, missing-typing, and non-invertibility challenges
 of \S\ref{sec:model}. The framework is also \emph{conceptual}: it does not by itself produce
-proofs, and our worked examples are micro-instances chosen for clarity rather than a
-large-scale evaluation.
+proofs, and our worked examples and micro-pilot are small, hand-constructed
+instances chosen for clarity rather than a large-scale trained-model evaluation.
 
 \paragraph{Threats to validity.}
 The verifiability gap $g$ is only meaningful relative to a fixed reduction $\rho$ and
 benchmark $D$; different choices of IR change $g$ even when the underlying model is unchanged.
 We therefore treat $g$ as a \emph{comparative} diagnostic within one pipeline, not an absolute
 quality measure. The proposition's conclusion is conditional on soundness, which must be
-established separately for each verifier.
+established separately for each verifier. The micro-pilot of \S\ref{sec:pilot} uses a
+hand-constructed derivation set and a deterministic reduction; its $g=0.30$ is a method
+demonstration, not a population estimate.
 
 \section{Discussion and Future Work}\label{sec:discussion}
 Three directions follow naturally. First, the IR can serve as the action space of a
