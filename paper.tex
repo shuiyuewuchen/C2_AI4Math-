@@ -528,6 +528,23 @@ established separately for each verifier. The micro-pilot of \S\ref{sec:pilot} u
 hand-constructed derivation set and a deterministic reduction; its $g=0.30$ is a method
 demonstration, not a population estimate.
 
+\paragraph{Applicability boundary of $g$.}
+The gap indicator is defined only where the reduction $\rho$ can obtain a handle on the
+derivation, so it should not be applied outside the following scope. First, tasks whose answers
+are produced without explicit intermediate steps---single-jump or purely categorical
+outputs---offer nothing for $\rho$ to check: the whole answer falls into $D \setminus V$, and
+the resulting $g$ measures the absence of a handle rather than a property of the model.
+Second, steps that are not decidable by a finite typing-and-evaluation argument (for example
+steps resting on an external oracle or on a claim outside the IR) cannot be classified as
+reducible or irreducible, so such tasks must be excluded from $D$ rather than counted as silent
+errors. Third, tasks requiring an external tool or environment to check---numerical
+integration, code execution, or retrieval---lie outside the present DSL, whose side conditions
+cover only literals, addition, exact division, and typed substitution; admitting such steps
+would change the meaning of $g$ and must be treated as a different configuration of the triple
+$(\rho, D, \text{strictness})$. These three exclusions are the boundary promised in
+\S\ref{sec:pilot}: within them $g$ is comparable across systems under a fixed $(\rho, D)$, and
+outside them it is not an absolute score of correctness.
+
 \section{Discussion and Future Work}\label{sec:discussion}
 Three directions follow naturally. First, the IR can serve as the action space of a
 proof-search agent, making the reduction and the search a single learned loop---as
