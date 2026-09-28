@@ -114,6 +114,12 @@ with worked micro-examples,
 intended to make reliability properties of AI4Math systems \emph{measurable} and
 \emph{auditable}.
 
+The rest of the paper is organized as follows. \S\ref{sec:related} positions our work
+along three lines of prior research; \S\ref{sec:model} formalizes the three-layer model;
+\S\ref{sec:framework} instantiates it as a pipeline; \S\ref{sec:analysis} develops the gap,
+taxonomy, checklist, and micro-pilot; \S\ref{sec:limitations} states limitations; and
+\S\ref{sec:discussion} closes with future work.
+
 \section{Related Work}\label{sec:related}
 The reliability of AI mathematics has developed along three interleaved lines. We trace each
 line briefly and locate this paper relative to it.
@@ -160,7 +166,7 @@ admit a formal check. Our verifiability gap supplies that missing measure.
 
 \section{A Three-Layer Reliability Model}\label{sec:model}
 We model an AI4Math pipeline as the composition of three layers, each with a distinct
-responsibility and failure mode.
+responsibility and failure mode; Figure~\ref{fig:layers} summarizes the model.
 
 \begin{definition}[Three-layer model]
 A \emph{reliable AI-mathematical reasoning system} is a triple
@@ -240,22 +246,33 @@ reduction has succeeded there~\cite{hubert2025}. The reliability of the \emph{wh
 therefore governed by the coverage and fidelity of $\rho$.
 
 \section{The Semantic-Reduction Framework}\label{sec:framework}
+We instantiate the three-layer model as a concrete framework---a typed IR, a pipeline,
+and bidirectional alignment---and close with worked examples (\S\ref{sec:example}).
+
 \subsection{Typed Intermediate Representation}
-We propose that the reduction layer target a single, uniform typed IR. The IR is characterized
-by four components:
+We propose that the reduction layer target a single, uniform typed IR, characterized
+formally as follows.
+
+\begin{definition}[Typed intermediate representation]\label{def:ir}
+A \emph{typed intermediate representation} is a quadruple
+$(\mathsf{Typ}, \den{\cdot}, \mathsf{Con}, \mathsf{Comp})$ where
 \begin{itemize}[leftmargin=1.5em]
-  \item a \emph{type system} assigning each object a type $\tau$;
-  \item an \emph{operational semantics} $\den{\cdot} : \mathrm{IR} \to \mathrm{Value}$ giving
-        each closed object a deterministic meaning;
-  \item a \emph{constraint system} recording side conditions (e.g., ``divisor nonzero'');
-  \item a \emph{compositional structure} (an abstract syntax tree or a workflow graph) so that
-        sub-derivations can be checked independently and composed.
+  \item $\mathsf{Typ}$ is a \emph{type system} assigning each object a type $\tau$;
+  \item $\den{\cdot} : \mathrm{IR} \to \mathrm{Value}$ is an \emph{operational semantics}
+        giving each closed object a deterministic meaning;
+  \item $\mathsf{Con}$ is a \emph{constraint system} recording side conditions
+        (e.g., ``divisor nonzero'');
+  \item $\mathsf{Comp}$ is a \emph{compositional structure} (an abstract syntax tree or a
+        workflow graph) under which sub-derivations can be checked independently and composed.
 \end{itemize}
-Concrete realizations include domain-specific languages, abstract syntax trees, proof objects,
-and workflow graphs; they are interchangeable as long as they expose the four components above.
+\end{definition}
+
+Concrete realizations---domain-specific languages, abstract syntax trees, proof objects, and
+workflow graphs---are interchangeable as long as they expose the four components of
+Definition~\ref{def:ir}.
 
 \subsection{Pipeline Architecture}
-The framework instantiates a standard pipeline:
+The framework instantiates a standard pipeline (Figure~\ref{fig:pipeline}):
 \[
 \resizebox{\linewidth}{!}{$\displaystyle
 \text{Natural language (LLM)}
@@ -377,7 +394,25 @@ self-consistency characterize the generator's \emph{accuracy}, while $g$ charact
 \emph{reducibility} of its output to a checkable object---the property that determines whether
 the accuracy numbers can themselves be trusted. A system can have high pass@$k$ yet a large
 $g$ (accurate but uncheckable), or a small $g$ yet low pass@$k$ (checkable but wrong);
-end-to-end reliability requires reporting both.
+end-to-end reliability requires reporting both. Table~\ref{tab:metrics} condenses the
+distinction.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}l l c c@{}}
+\toprule
+\textbf{Metric} & \textbf{Measures} & \textbf{Finds silent errors?} & \textbf{Gold to score?}\\
+\midrule
+pass@$k$ \cite{chen2021codex} & sample accuracy & no & yes\\
+Self-consistency \cite{wang2023selfconsistency} & consensus accuracy & no & yes\\
+Verifiability gap $g$ & output reducibility & yes ($D \setminus V$) & no\\
+\bottomrule
+\end{tabular}
+\caption{Contrasting the verifiability gap with accuracy-centric metrics. pass@$k$ and
+self-consistency require gold labels to be scored; $g$ is computed from the reduction alone.}
+\label{tab:metrics}
+\end{table}
 
 \subsection{A Taxonomy of Reliability Mechanisms}
 Table~\ref{tab:taxonomy} classifies the dominant AI4Math approaches by \emph{where}
@@ -427,7 +462,7 @@ systems, inspired by but distinct from ML reproducibility checklists. Each item 
 To show that the gap is measurable rather than merely defined, we ran a small, fully
 reproducible micro-pilot. We hand-constructed $|D| = 20$ arithmetic word-problem derivations
 (14 well-typed and 6 deliberately malformed) and implemented $\rho$ as a tiny typed DSL whose
-side conditions mirror \S\ref{sec:framework}: literals are typed $\mathsf{Nat}$, subtraction
+side conditions mirror Definition~\ref{def:ir}: literals are typed $\mathsf{Nat}$, subtraction
 requires a nonnegative result, and division requires an exact divisor. The full script is
 provided alongside this paper (\texttt{pilot.py}). Table~\ref{tab:pilot} summarizes the
 outcome, and two representative cases follow.
@@ -459,7 +494,18 @@ therefore has no handle, and the fluent-but-wrong reading ``$2$'' is invisible t
 The six failures break down into four named causes: non-exact division ($2$), ambiguous
 reference ($2$), vague quantifier ($1$), and missing typing ($1$). Consistent with
 Proposition~\ref{prop:sound}, the verifier produced no false positives among the reducible
-cases and no signal at all among the silent errors. A natural next step is to re-run this
+cases and no signal at all among the silent errors.
+
+\paragraph{Sensitivity and interpretation.}
+The value $g=0.30$ is not an intrinsic property of the generator but of the triple
+$(\rho, D, \text{reduction strictness})$. A more permissive $\rho$---for example, one that
+admits inexact division by extending the DSL with an explicit remainder type---raises $|V|$
+and lowers $g$; a harder or more ambiguous derivation set $D$ lowers $|V|$ and raises $g$.
+We therefore read $g$ as a \emph{comparative} diagnostic: it is meaningful when the same
+$(\rho, D)$ is held fixed across two systems, and it should not be interpreted as an absolute
+quality score. We keep this boundary explicit in \S\ref{sec:limitations}.
+
+A natural next step is to re-run this
 pilot by sampling derivations from a real model on a benchmark subset such as GSM8K, so
 that $g$ becomes a measured property of a trained model rather than a hand-constructed
 illustration.

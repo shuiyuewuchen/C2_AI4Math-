@@ -74,3 +74,30 @@
 3. **可执行代码风险**：AI 起初建议内嵌 Lean 代码证明片段；未经验证即内嵌有编译失败风险。
    → 对策：改为"归纳对象"的**示意性**推理规则展示，避免贴入未经 `#check`/编译验证的代码。
 
+
+
+---
+
+## 三段对照证据：prompt → AI 原始输出 → 人工纠正
+
+> 示例：对应论文 §2 的 AlphaProof 表述与文献 `hubert2025` 的核验过程。
+
+**Prompt（原文）**
+
+```
+请给我一段 AlphaProof 在 2024 年 IMO 上表现的介绍，含具体分数与可核验的文献引用。
+```
+
+**AI 原始输出（有错）**
+
+```
+AlphaProof 在 2024 年国际数学奥林匹克（IMO）上完整解决了全部 6 道题，
+成为首个满分 AI。相关论文：Hubert et al., Olympiad-level formal mathematical
+reasoning with reinforcement learning, Nature, 2026.
+```
+
+**人工纠正（回源核验后）**
+
+- 错误 1：并非"完整解决全部 6 题 / 满分"。实际为 AlphaProof 与 AlphaGeometry 2 合计解出 **4/6 题、28/42 分、银牌水平**（金牌线 29 分）。
+- 错误 2：文献年份不是 2026。Nature 卷期 651(8106):607–613 的官方引用年为 **2025**（DOI `10.1038/s41586-025-09833-y`）。
+- 最终写入论文：`it reached a silver-medal standard (28 out of 42 points, solving four of six problems) on IMO 2024~\cite{hubert2025}`。

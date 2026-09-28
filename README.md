@@ -21,7 +21,7 @@
 | 文件 | 用途 |
 |---|---|
 | `paper.tex` | 论文主文件，**单次 `pdflatex`/`xelatex` 即可编译**（参考文献内联 `thebibliography`），含完整结构：摘要、引言、相关工作、三层模型、框架、分析、Limitations、Discussion and Future Work、结论、参考文献 |
-| `paper.pdf` | 已编译好的成品 PDF（10 页，Letter），评委无需自己编译即可查看 |
+| `paper.pdf` | 已编译好的成品 PDF（11 页，Letter），评委无需自己编译即可查看 |
 | `references.bib` | BibTeX 引用库，**24 条**，全部真实可查（Nature、NeurIPS、ICLR、ICML、CADE、arXiv，含一手文献） |
 | `pilot.py` | 20 题 micro-pilot 脚本：实现 typed DSL 与 `ρ`，实测 verifiability gap `g=0.30`（可复现） |
 | `AI日志.md` | 2 天 AI 协作日志：逐条引用回源核验表 + 3 个 AI 误导案例 |
@@ -82,3 +82,16 @@ pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex
 
 - 周期：2 天（紧凑版）
 - 交付目录：本文件夹（`C2_AI4Math论文_交付`）
+
+
+## 七、变更记录（Changelog）
+
+| 版本 | 内容 |
+|---|---|
+| v1.4 | 补 `g` 与 pass@k / Self-Consistency 的对比论证 + 三行对比表；新增 `chen2021codex` 引用（24 条）；补 6 处图表/章节交叉引用；把 IR 四性质提为正式 Definition；加 `g` 敏感性论证 |
+| v1.3 | 新增 20 题 micro-pilot（`g=0.30`，附 `pilot.py`）；Related Work 重写为三线脉络叙事；新增三层模型图 |
+| v1.2 | 修正 hubert 文献年份 2026→2025（含 DOI）；`references.bib` 重音转义全部改为 UTF-8；拆分 Limitations 小节 |
+| v1.1 | 周期 5 天→2 天；补齐 README 与编译产物 `paper.pdf` |
+| v1.0 | 初版：`paper.tex` + `references.bib` + AI日志 + AAR |
+
+> 当前成品：`paper.pdf` **11 页**；`references.bib` **24 条**；`pilot.py` 可复现 `g=0.30`。
